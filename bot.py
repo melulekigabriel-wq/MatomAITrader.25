@@ -1,31 +1,31 @@
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-import random
+from signals import generate_signal
 import os
 
 TOKEN = os.getenv("BOT_TOKEN")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    pairs = ["EUR/USD", "GBP/USD", "USD/JPY", "XAU/USD"]
-    signals = ["BUY", "SELL", "WAIT"]
-
-    pair = random.choice(pairs)
-    signal = random.choice(signals)
-    confidence = random.randint(70, 95)
+    data = generate_signal()
 
     message = f"""
 🔥 MATOM AI TRADER 🔥
 
-PAIR: {pair}
+SIGNAL: {data['signal']}
 
-SIGNAL: {signal}
+CONFIDENCE: {data['confidence']}%
 
-CONFIDENCE: {confidence}%
+MARKET STRUCTURE:
+{data['bos']}
 
-TREND: BULLISH
+TREND:
+{data['trend']}
 
-RISK: MODERATE
+SMART MONEY CONCEPTS:
+✅ {data['order_block']}
+✅ {data['liquidity']}
+✅ {data['fvg']}
 """
 
     await update.message.reply_text(message)
@@ -33,5 +33,7 @@ RISK: MODERATE
 app = ApplicationBuilder().token(TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
+
+print("Bot is running...")
 
 app.run_polling()
