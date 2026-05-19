@@ -44,6 +44,15 @@ MARKET STRUCTURE:
 TREND:
 {data['trend']}
 
+MULTI-TIMEFRAME ANALYSIS:
+15m → {data['timeframes']['15m']}
+1H → {data['timeframes']['1H']}
+4H → {data['timeframes']['4H']}
+Daily → {data['timeframes']['Daily']}
+
+OVERALL TREND:
+{data['overall_trend']}
+
 SMART MONEY CONCEPTS:
 ✅ {data['order_block']}
 ✅ {data['liquidity']}
