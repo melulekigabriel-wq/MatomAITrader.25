@@ -1,6 +1,7 @@
 import random
 from market_structure import detect_bos, detect_trend
 from smc import detect_order_block, detect_liquidity, detect_fvg
+from market_data import get_price
 from config import PAIRS
 
 def calculate_confidence(bos, trend):
@@ -17,12 +18,21 @@ def calculate_confidence(bos, trend):
 
     return min(confidence, 95)
 
-
 def generate_signal():
 
-    prices = [100, 103, 105, 108]
-
     pair = random.choice(PAIRS)
+
+    live_price = get_price(pair)
+
+    if not live_price:
+        live_price = 1.0850
+
+    prices = [
+        live_price - 0.0030,
+        live_price - 0.0020,
+        live_price - 0.0010,
+        live_price
+    ]
 
     bos = detect_bos(prices)
 
@@ -41,7 +51,7 @@ def generate_signal():
     if trend == "BEARISH":
         signal = "SELL"
 
-    entry = round(random.uniform(1.0800, 1.0900), 5)
+    entry = round(live_price, 5)
 
     stop_loss = round(entry - 0.0020, 5)
 
