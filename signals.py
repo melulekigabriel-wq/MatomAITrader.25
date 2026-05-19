@@ -2,17 +2,18 @@ import random
 from market_structure import detect_bos, detect_trend
 from smc import detect_order_block, detect_liquidity, detect_fvg
 from market_data import get_price
+from timeframes import analyze_timeframes
 from config import PAIRS
 
-def calculate_confidence(bos, trend):
+def calculate_confidence(bos, trend, overall_trend):
 
     confidence = 50
 
     if "BULLISH" in bos:
-        confidence += 15
+        confidence += 10
 
-    if trend == "BULLISH":
-        confidence += 15
+    if trend == overall_trend:
+        confidence += 20
 
     confidence += random.randint(5, 15)
 
@@ -38,17 +39,23 @@ def generate_signal():
 
     trend = detect_trend(prices)
 
+    timeframe_analysis, overall_trend = analyze_timeframes()
+
     order_block = detect_order_block()
 
     liquidity = detect_liquidity()
 
     fvg = detect_fvg()
 
-    confidence = calculate_confidence(bos, trend)
+    confidence = calculate_confidence(
+        bos,
+        trend,
+        overall_trend
+    )
 
     signal = "BUY"
 
-    if trend == "BEARISH":
+    if overall_trend == "BEARISH":
         signal = "SELL"
 
     entry = round(live_price, 5)
@@ -63,6 +70,8 @@ def generate_signal():
         "confidence": confidence,
         "bos": bos,
         "trend": trend,
+        "overall_trend": overall_trend,
+        "timeframes": timeframe_analysis,
         "order_block": order_block,
         "liquidity": liquidity,
         "fvg": fvg,
