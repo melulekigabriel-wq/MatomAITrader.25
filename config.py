@@ -1,0 +1,16 @@
+BOT_NAME = "MATOM AI TRADER"
+
+DEFAULT_PAIR = "EUR/USD"
+
+TIMEFRAME = "15m"
+
+RISK_LEVEL = "Moderate"
+
+MIN_CONFIDENCE = 80
+
+PAIRS = [
+    "EUR/USD",
+    "GBP/USD",
+    "USD/JPY",
+    "XAU/USD"
+]
