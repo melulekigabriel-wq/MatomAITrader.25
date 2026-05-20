@@ -7,7 +7,13 @@ from market_structure import (
     detect_swing_high,
     detect_swing_low
 )
-from smc import detect_order_block, detect_liquidity, detect_fvg
+from smc import (
+    detect_order_block,
+    detect_fvg,
+    detect_liquidity_sweep,
+    detect_equal_highs,
+    detect_equal_lows
+)
 from market_data import get_price
 from timeframes import analyze_timeframes
 from config import PAIRS
@@ -56,7 +62,11 @@ def generate_signal():
 
     order_block = detect_order_block()
 
-    liquidity = detect_liquidity()
+    liquidity = detect_liquidity_sweep(prices)
+
+    equal_highs = detect_equal_highs(prices)
+
+    equal_lows = detect_equal_lows(prices)
 
     fvg = detect_fvg()
 
@@ -80,6 +90,8 @@ def generate_signal():
     take_profit = round(entry + 0.0050, 5)
 
     return {
+        "equal_highs": equal_highs,
+        "equal_lows": equal_lows,
         "choch": choch,
         "swing_high": swing_high,
         "swing_low": swing_low,
