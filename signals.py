@@ -111,6 +111,12 @@ def generate_signal():
     take_profit=take_profit,
     trend=trend,
     session_name=session
+
+            # NEW ADDITIONS
+    result="OPEN",
+    pnl=0.0,
+    closed_price=0.0,
+    is_closed=0
     )
 
     db.add(trade)
