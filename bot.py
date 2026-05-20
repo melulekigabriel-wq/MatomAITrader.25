@@ -67,6 +67,11 @@ SMART MONEY CONCEPTS:
 ✅ {data['liquidity']}
 ✅ {data['fvg']}
 
+LIQUIDITY ANALYSIS:
+✅ {data['liquidity']}
+✅ {data['equal_highs']}
+✅ {data['equal_lows']}
+
 CANDLESTICK ANALYSIS:
 ✅ {data['candlestick']}
 """
