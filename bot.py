@@ -46,6 +46,7 @@ AVAILABLE COMMANDS:
 /start - Start bot
 /signal - Get signal
 /help - Show commands
+/history - View recent signals
 /status - Bot status
 """
 
