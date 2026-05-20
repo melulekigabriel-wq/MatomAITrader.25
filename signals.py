@@ -1,6 +1,12 @@
 import random
 from candles import detect_candlestick_pattern
-from market_structure import detect_bos, detect_trend
+from market_structure import (
+    detect_bos,
+    detect_trend,
+    detect_choch,
+    detect_swing_high,
+    detect_swing_low
+)
 from smc import detect_order_block, detect_liquidity, detect_fvg
 from market_data import get_price
 from timeframes import analyze_timeframes
@@ -40,6 +46,12 @@ def generate_signal():
 
     trend = detect_trend(prices)
 
+    choch = detect_choch(prices)
+
+    swing_high = detect_swing_high(prices)
+
+    swing_low = detect_swing_low(prices)
+
     timeframe_analysis, overall_trend = analyze_timeframes()
 
     order_block = detect_order_block()
@@ -68,6 +80,9 @@ def generate_signal():
     take_profit = round(entry + 0.0050, 5)
 
     return {
+        "choch": choch,
+        "swing_high": swing_high,
+        "swing_low": swing_low,
         "candlestick": candlestick,
         "pair": pair,
         "signal": signal,
