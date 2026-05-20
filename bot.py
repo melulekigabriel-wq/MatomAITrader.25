@@ -62,6 +62,10 @@ Daily → {data['timeframes']['Daily']}
 OVERALL TREND:
 {data['overall_trend']}
 
+SESSION ANALYSIS:
+✅ {data['session']}
+✅ {data['volatility']}
+
 SMART MONEY CONCEPTS:
 ✅ {data['order_block']}
 ✅ {data['liquidity']}
