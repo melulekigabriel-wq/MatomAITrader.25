@@ -1,4 +1,5 @@
 import random
+from candles import detect_candlestick_pattern
 from market_structure import detect_bos, detect_trend
 from smc import detect_order_block, detect_liquidity, detect_fvg
 from market_data import get_price
@@ -20,7 +21,7 @@ def calculate_confidence(bos, trend, overall_trend):
     return min(confidence, 95)
 
 def generate_signal():
-
+    
     pair = random.choice(PAIRS)
 
     live_price = get_price(pair)
@@ -47,6 +48,8 @@ def generate_signal():
 
     fvg = detect_fvg()
 
+    candlestick = detect_candlestick_pattern()
+
     confidence = calculate_confidence(
         bos,
         trend,
@@ -65,6 +68,7 @@ def generate_signal():
     take_profit = round(entry + 0.0050, 5)
 
     return {
+        "candlestick": candlestick,
         "pair": pair,
         "signal": signal,
         "confidence": confidence,
