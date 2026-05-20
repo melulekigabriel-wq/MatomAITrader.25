@@ -88,6 +88,34 @@ async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "✅ MATOM AI TRADER is online and monitoring markets."
     )
+    
+async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    db = SessionLocal()
+
+    trades = db.query(Trade).filter(Trade.is_closed == 1).all()
+
+    total = len(trades)
+    wins = len([t for t in trades if t.result == "WIN"])
+    losses = len([t for t in trades if t.result == "LOSS"])
+
+    win_rate = (wins / total * 100) if total > 0 else 0
+    total_pnl = sum([t.pnl for t in trades])
+
+    db.close()
+
+    await update.message.reply_text(
+        f"""
+📊 TRADING STATS 📊
+
+Total Trades: {total}
+Wins: {wins}
+Losses: {losses}
+
+Win Rate: {win_rate:.2f}%
+Total PnL: {total_pnl:.2f}
+"""
+        )
 
 # FORMAT SIGNAL
 def format_signal(data):
@@ -157,6 +185,7 @@ app.add_handler(CommandHandler("signal", signal))
 app.add_handler(CommandHandler("help", help_command))
 app.add_handler(CommandHandler("status", status))
 app.add_handler(CommandHandler("history", history))
+app.add_handler(CommandHandler("stats", stats))
 
 scheduler = AsyncIOScheduler()
 
