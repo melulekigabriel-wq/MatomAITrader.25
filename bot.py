@@ -41,6 +41,15 @@ TAKE PROFIT: {data['take_profit']}
 MARKET STRUCTURE:
 {data['bos']}
 
+CHoCH:
+{data['choch']}
+
+SWING HIGH:
+{data['swing_high']}
+
+SWING LOW:
+{data['swing_low']}
+
 TREND:
 {data['trend']}
 
