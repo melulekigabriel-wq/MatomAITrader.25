@@ -5,6 +5,7 @@ from telegram.ext import (
     ContextTypes
 )
 
+from database import Trade, SessionLocal
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from signals import generate_signal
@@ -49,6 +50,36 @@ AVAILABLE COMMANDS:
 """
 
     await update.message.reply_text(help_text)
+
+# HISTORY COMMAND
+async def history(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    db = SessionLocal()
+
+    trades = db.query(Trade).order_by(Trade.id.desc()).limit(5).all()
+
+    if not trades:
+
+        await update.message.reply_text("No trade history yet.")
+
+        return
+
+    message = "📊 LAST 5 SIGNALS 📊\n\n"
+
+    for trade in trades:
+
+        message += f"""
+PAIR: {trade.pair}
+SIGNAL: {trade.signal}
+CONFIDENCE: {trade.confidence}%
+TREND: {trade.trend}
+SESSION: {trade.session_name}
+
+"""
+
+    db.close()
+
+    await update.message.reply_text(message)
 
 # STATUS COMMAND
 async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -124,6 +155,7 @@ app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("signal", signal))
 app.add_handler(CommandHandler("help", help_command))
 app.add_handler(CommandHandler("status", status))
+app.add_handler(CommandHandler("history", history))
 
 scheduler = AsyncIOScheduler()
 
