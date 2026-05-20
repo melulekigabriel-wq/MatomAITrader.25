@@ -26,6 +26,12 @@ class Trade(Base):
 
     session_name = Column(String)
 
+# NEW FIELDS (WIN RATE TRACKING)
+result = Column(String)      # WIN / LOSS / BE / OPEN
+pnl = Column(Float)
+closed_price = Column(Float)
+is_closed = Column(Integer, default=0)
+
 DATABASE_URL = "sqlite:///trades.db"
 
 engine = create_engine(DATABASE_URL)
