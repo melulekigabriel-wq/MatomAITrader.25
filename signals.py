@@ -1,5 +1,6 @@
 import random
 from candles import detect_candlestick_pattern
+from database import Trade, SessionLocal
 from market_structure import (
     detect_bos,
     detect_trend,
@@ -98,6 +99,25 @@ def generate_signal():
     stop_loss = round(entry - 0.0020, 5)
 
     take_profit = round(entry + 0.0050, 5)
+
+    db = SessionLocal()
+
+    trade = Trade(
+    pair=pair,
+    signal=signal,
+    confidence=confidence,
+    entry=entry,
+    stop_loss=stop_loss,
+    take_profit=take_profit,
+    trend=trend,
+    session_name=session
+    )
+
+    db.add(trade)
+
+    db.commit()
+
+    db.close()
 
     return {
         "equal_highs": equal_highs,
