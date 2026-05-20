@@ -57,6 +57,9 @@ SMART MONEY CONCEPTS:
 ✅ {data['order_block']}
 ✅ {data['liquidity']}
 ✅ {data['fvg']}
+
+CANDLESTICK ANALYSIS:
+✅ {data['candlestick']}
 """
 
     await update.message.reply_text(message)
