@@ -14,6 +14,7 @@ from smc import (
     detect_equal_highs,
     detect_equal_lows
 )
+from session import get_market_session, get_volatility
 from market_data import get_price
 from timeframes import analyze_timeframes
 from config import PAIRS
@@ -31,6 +32,11 @@ def calculate_confidence(bos, trend, overall_trend):
     confidence += random.randint(5, 15)
 
     return min(confidence, 95)
+
+    if overall_trend == "BULLISH":
+    confidence += 10
+
+    confidence += random.randint(5, 10)
 
 def generate_signal():
     
@@ -70,6 +76,10 @@ def generate_signal():
 
     fvg = detect_fvg()
 
+    session = get_market_session()
+
+    volatility = get_volatility()
+
     candlestick = detect_candlestick_pattern()
 
     confidence = calculate_confidence(
@@ -95,6 +105,8 @@ def generate_signal():
         "choch": choch,
         "swing_high": swing_high,
         "swing_low": swing_low,
+        "session": session,
+        "volatility": volatility,
         "candlestick": candlestick,
         "pair": pair,
         "signal": signal,
