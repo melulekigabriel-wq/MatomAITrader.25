@@ -8,6 +8,7 @@ from telegram.ext import (
 from database import Trade, SessionLocal
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+from trade_manager import get_statistics
 from engine import run_engine
 from config import BOT_NAME
 
@@ -48,6 +49,7 @@ AVAILABLE COMMANDS:
 /help - Show commands
 /history - View recent signals
 /status - Bot status
+/stats - View performance statistics
 """
 
     await update.message.reply_text(help_text)
@@ -116,6 +118,25 @@ Win Rate: {win_rate:.2f}%
 Total PnL: {total_pnl:.2f}
 """
         )
+    async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    data = get_statistics()
+
+    message = f"""
+📊 MATOM AI STATISTICS
+
+Total Trades: {data['total']}
+
+Wins: {data['wins']}
+
+Losses: {data['losses']}
+
+Open Trades: {data['open']}
+
+Win Rate: {data['win_rate']}%
+"""
+
+    await update.message.reply_text(message)
 
 # FORMAT SIGNAL
 def format_signal(data):
