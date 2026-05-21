@@ -8,7 +8,7 @@ from telegram.ext import (
 from database import Trade, SessionLocal
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from signals import generate_signal
+from engine import run_engine
 from config import BOT_NAME
 
 import os
@@ -31,7 +31,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # SIGNAL COMMAND
 async def signal(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    data = generate_signal()
+    data = run_engine()
 
     message = format_signal(data)
 
