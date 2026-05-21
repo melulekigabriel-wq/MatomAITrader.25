@@ -1,25 +1,18 @@
 from database import Trade, SessionLocal
 
-def close_trade(trade_id, result, closed_price):
+def update_trade_result(trade_id, result, profit=0):
 
     db = SessionLocal()
 
-    trade = db.query(Trade).filter(Trade.id == trade_id).first()
+    trade = db.query(Trade).filter(
+        Trade.id == trade_id
+    ).first()
 
-    if not trade:
-        return "Trade not found"
+    if trade:
 
-    trade.result = result
-    trade.closed_price = closed_price
-    trade.is_closed = 1
+        trade.result = result
+        trade.profit = profit
 
-    # PnL calculation
-    if trade.signal == "BUY":
-        trade.pnl = closed_price - trade.entry
-    else:
-        trade.pnl = trade.entry - closed_price
+        db.commit()
 
-    db.commit()
     db.close()
-
-    return "Trade updated"
