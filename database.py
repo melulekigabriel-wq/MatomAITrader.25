@@ -26,6 +26,10 @@ class Trade(Base):
 
     session_name = Column(String)
 
+    result = Column(String, default="OPEN")
+
+    profit = Column(Float, default=0.0)
+
 # NEW FIELDS (WIN RATE TRACKING)
 result = Column(String)      # WIN / LOSS / BE / OPEN
 pnl = Column(Float)
