@@ -13,34 +13,57 @@ from engine import run_engine
 from config import BOT_NAME
 
 import os
+import logging
+
+# Setup logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 TOKEN = os.getenv("BOT_TOKEN")
+
+if not TOKEN:
+    logger.error("❌ BOT_TOKEN environment variable not set!")
+    raise ValueError("BOT_TOKEN is required!")
+
+logger.info(f"✅ BOT_TOKEN found: {TOKEN[:10]}...")
 
 CHAT_ID = None
 
 # START COMMAND
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    global CHAT_ID
-
-    CHAT_ID = update.effective_chat.id
-
-    await update.message.reply_text(
-        f"🔥 Welcome to {BOT_NAME} 🔥\n\nUse /signal to get trading signals."
-    )
     
+    global CHAT_ID
+    
+    try:
+        CHAT_ID = update.effective_chat.id
+        
+        await update.message.reply_text(
+            f"🔥 Welcome to {BOT_NAME} 🔥\n\nUse /signal to get trading signals."
+        )
+        logger.info(f"✅ /start command from user {CHAT_ID}")
+    except Exception as e:
+        logger.error(f"❌ Error in start command: {str(e)}")
+        await update.message.reply_text(f"Error: {str(e)}")
+
 # SIGNAL COMMAND
 async def signal(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    data = run_engine()
-    message = format_signal(data)
-
-    await update.message.reply_text(message)
+    
+    try:
+        logger.info("📊 /signal command received")
+        data = run_engine()
+        message = format_signal(data)
+        await update.message.reply_text(message)
+    except Exception as e:
+        logger.error(f"❌ Error in signal command: {str(e)}")
+        await update.message.reply_text(f"❌ Error generating signal: {str(e)}")
 
 
 # HELP COMMAND
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
+    
     help_text = """
 AVAILABLE COMMANDS:
 
@@ -51,28 +74,29 @@ AVAILABLE COMMANDS:
 /status - Bot status
 /stats - View performance statistics
 """
-
+    
     await update.message.reply_text(help_text)
 
 
 # HISTORY COMMAND
 async def history(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    db = SessionLocal()
-
-    trades = db.query(Trade).order_by(Trade.id.desc()).limit(5).all()
-
-    if not trades:
-
-        await update.message.reply_text("No trade history yet.")
-
-        return
-
-    message = "📊 LAST 5 SIGNALS 📊\n\n"
-
-    for trade in trades:
-
-        message += f"""
+    
+    try:
+        db = SessionLocal()
+        
+        trades = db.query(Trade).order_by(Trade.id.desc()).limit(5).all()
+        
+        if not trades:
+            
+            await update.message.reply_text("No trade history yet.")
+            
+            return
+        
+        message = "📊 LAST 5 SIGNALS 📊\n\n"
+        
+        for trade in trades:
+            
+            message += f"""
 PAIR: {trade.pair}
 SIGNAL: {trade.signal}
 CONFIDENCE: {trade.confidence}%
@@ -80,24 +104,31 @@ TREND: {trade.trend}
 SESSION: {trade.session_name}
 
 """
-
-    db.close()
-
-    await update.message.reply_text(message)
+        
+        db.close()
+        
+        await update.message.reply_text(message)
+    except Exception as e:
+        logger.error(f"❌ Error in history command: {str(e)}")
+        await update.message.reply_text(f"❌ Error retrieving history: {str(e)}")
 
 # STATUS COMMAND
 async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    await update.message.reply_text(
-        "✅ MATOM AI TRADER is online and monitoring markets."
-    )
+    
+    try:
+        await update.message.reply_text(
+            "✅ MATOM AI TRADER is online and monitoring markets."
+        )
+    except Exception as e:
+        logger.error(f"❌ Error in status command: {str(e)}")
     
 # STATS COMMAND
 async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    data = get_statistics()
-
-    message = f"""
+    
+    try:
+        data = get_statistics()
+        
+        message = f"""
 📊 MATOM AI STATISTICS
 
 Total Trades: {data['total']}
@@ -110,12 +141,15 @@ Open Trades: {data['open']}
 
 Win Rate: {data['win_rate']}%
 """
-
-    await update.message.reply_text(message)
+        
+        await update.message.reply_text(message)
+    except Exception as e:
+        logger.error(f"❌ Error in stats command: {str(e)}")
+        await update.message.reply_text(f"❌ Error retrieving stats: {str(e)}")
     
 # FORMAT SIGNAL
 def format_signal(data):
-
+    
     return f"""
 🚨 MATOM AI SIGNAL 🚨
 
@@ -158,42 +192,59 @@ CANDLESTICK:
 
 # AUTO SIGNAL TASK
 async def auto_signal(app):
-
+    
     global CHAT_ID
-
+    
     if CHAT_ID is None:
         return
+    
+    try:
+        data = run_engine()
+        
+        # Send only strong signals
+        if data['confidence'] >= 80:
+            
+            await app.bot.send_message(
+                chat_id=CHAT_ID,
+                text=format_signal(data)
+            )
+            logger.info(f"📨 Auto signal sent - Confidence: {data['confidence']}%")
+    except Exception as e:
+        logger.error(f"❌ Error in auto_signal: {str(e)}")
 
-    data = run_engine()
-
-    # Send only strong signals
-    if data['confidence'] >= 80:
-
-        await app.bot.send_message(
-            chat_id=CHAT_ID,
-            text=format_signal(data)
-        )
-
-app = ApplicationBuilder().token(TOKEN).build()
-
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("signal", signal))
-app.add_handler(CommandHandler("help", help_command))
-app.add_handler(CommandHandler("status", status))
-app.add_handler(CommandHandler("history", history))
-app.add_handler(CommandHandler("stats", stats))
-
-scheduler = AsyncIOScheduler()
-
-scheduler.add_job(
-    auto_signal,
-    "interval",
-    minutes=5,
-    args=[app]
-)
-
-scheduler.start()
-
-print("MATOM AI TRADER RUNNING...")
-
-app.run_polling()
+try:
+    logger.info("🚀 Initializing Telegram bot...")
+    app = ApplicationBuilder().token(TOKEN).build()
+    
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("signal", signal))
+    app.add_handler(CommandHandler("help", help_command))
+    app.add_handler(CommandHandler("status", status))
+    app.add_handler(CommandHandler("history", history))
+    app.add_handler(CommandHandler("stats", stats))
+    
+    logger.info("✅ Command handlers registered")
+    
+    scheduler = AsyncIOScheduler()
+    
+    scheduler.add_job(
+        auto_signal,
+        "interval",
+        minutes=5,
+        args=[app]
+    )
+    
+    scheduler.start()
+    logger.info("✅ APScheduler started (auto-signals every 5 minutes)")
+    
+    logger.info("🔥 MATOM AI TRADER RUNNING... 🔥")
+    logger.info(f"Bot Name: {BOT_NAME}")
+    logger.info("Waiting for commands...")
+    
+    app.run_polling()
+    
+except Exception as e:
+    logger.critical(f"❌ CRITICAL ERROR: {str(e)}")
+    import traceback
+    logger.critical(traceback.format_exc())
+    raise
