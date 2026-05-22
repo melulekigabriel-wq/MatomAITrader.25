@@ -28,15 +28,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"🔥 Welcome to {BOT_NAME} 🔥\n\nUse /signal to get trading signals."
     )
-
+    
 # SIGNAL COMMAND
 async def signal(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     data = run_engine()
-
     message = format_signal(data)
 
     await update.message.reply_text(message)
+
 
 # HELP COMMAND
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -53,6 +53,7 @@ AVAILABLE COMMANDS:
 """
 
     await update.message.reply_text(help_text)
+
 
 # HISTORY COMMAND
 async def history(update: Update, context: ContextTypes.DEFAULT_TYPE):
