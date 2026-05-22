@@ -16,7 +16,7 @@ from smc import (
     detect_equal_lows
 )
 from session import get_market_session, get_volatility
-from market_data import get_price
+from market_data import get_price, get_ohlc_data
 from timeframes import analyze_timeframes
 from config import PAIRS
 
@@ -30,14 +30,12 @@ def calculate_confidence(bos, trend, overall_trend):
     if trend == overall_trend:
         confidence += 20
 
-    confidence += random.randint(5, 15)
-
-    return min(confidence, 95)
-
     if overall_trend == "BULLISH":
         confidence += 10
 
-    confidence += random.randint(5, 10)
+    confidence += random.randint(5, 15)
+
+    return min(confidence, 95)
 
 def generate_signal():
     
@@ -103,20 +101,18 @@ def generate_signal():
     db = SessionLocal()
 
     trade = Trade(
-    pair=pair,
-    signal=signal,
-    confidence=confidence,
-    entry=entry,
-    stop_loss=stop_loss,
-    take_profit=take_profit,
-    trend=trend,
-    session_name=session
-
-            # NEW ADDITIONS
-    result="OPEN",
-    pnl=0.0,
-    closed_price=0.0,
-    is_closed=0
+        pair=pair,
+        signal=signal,
+        confidence=confidence,
+        entry=entry,
+        stop_loss=stop_loss,
+        take_profit=take_profit,
+        trend=trend,
+        session_name=session,
+        result="OPEN",
+        pnl=0.0,
+        closed_price=0.0,
+        is_closed=0
     )
 
     db.add(trade)
