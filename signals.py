@@ -35,7 +35,7 @@ def calculate_confidence(bos, trend, overall_trend):
     return min(confidence, 95)
 
     if overall_trend == "BULLISH":
-    confidence += 10
+        confidence += 10
 
     confidence += random.randint(5, 10)
 
