@@ -1,3 +1,4 @@
+import os
 from sqlalchemy import create_engine, Column, Integer, String, Float
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -30,13 +31,21 @@ class Trade(Base):
 
     profit = Column(Float, default=0.0)
 
-# NEW FIELDS (WIN RATE TRACKING)
-result = Column(String)      # WIN / LOSS / BE / OPEN
-pnl = Column(Float)
-closed_price = Column(Float)
-is_closed = Column(Integer, default=0)
+    # WIN RATE TRACKING FIELDS
+    pnl = Column(Float, default=0.0)
 
-DATABASE_URL = "sqlite:///trades.db"
+    closed_price = Column(Float, default=0.0)
+
+    is_closed = Column(Integer, default=0)
+
+# Use PostgreSQL for Render, SQLite for local development
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///trades.db")
+
+# Handle SQLite vs PostgreSQL driver differences
+if DATABASE_URL.startswith("postgresql"):
+    # Render uses postgresql+psycopg2
+    if not DATABASE_URL.startswith("postgresql+psycopg2"):
+        DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://")
 
 engine = create_engine(DATABASE_URL)
 
