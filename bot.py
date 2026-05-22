@@ -91,34 +91,8 @@ async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "✅ MATOM AI TRADER is online and monitoring markets."
     )
     
+# STATS COMMAND
 async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    db = SessionLocal()
-
-    trades = db.query(Trade).filter(Trade.is_closed == 1).all()
-
-    total = len(trades)
-    wins = len([t for t in trades if t.result == "WIN"])
-    losses = len([t for t in trades if t.result == "LOSS"])
-
-    win_rate = (wins / total * 100) if total > 0 else 0
-    total_pnl = sum([t.pnl for t in trades])
-
-    db.close()
-
-    await update.message.reply_text(
-        f"""
-📊 TRADING STATS 📊
-
-Total Trades: {total}
-Wins: {wins}
-Losses: {losses}
-
-Win Rate: {win_rate:.2f}%
-Total PnL: {total_pnl:.2f}
-"""
-        )
-    async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     data = get_statistics()
 
@@ -137,7 +111,7 @@ Win Rate: {data['win_rate']}%
 """
 
     await update.message.reply_text(message)
-
+    
 # FORMAT SIGNAL
 def format_signal(data):
 
@@ -189,7 +163,7 @@ async def auto_signal(app):
     if CHAT_ID is None:
         return
 
-    data = generate_signal()
+    data = run_engine()
 
     # Send only strong signals
     if data['confidence'] >= 80:
