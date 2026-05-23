@@ -1,3 +1,5 @@
+print("🔥 FILE IS RUNNING CORRECTLY", flush=True)
+
 import os
 import sys
 import logging
