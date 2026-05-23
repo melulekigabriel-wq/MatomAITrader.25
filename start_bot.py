@@ -1,11 +1,13 @@
-#!/usr/bin/env python3
-
+#!/
 import sys
 import os
 
-# Force unbuffered output to ensure logs appear in Render
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0) if hasattr(os, 'fdopen') else sys.stdout
-sys.stderr = sys.stdout
+# Enable immediate log output without using unsupported unbuffered text I/O
+try:
+    sys.stdout.reconfigure(line_buffering=True)
+    sys.stderr.reconfigure(line_buffering=True)
+except AttributeError:
+    pass
 
 print("=" * 60, flush=True)
 print("MATOM AI TRADER - BOT STARTUP", flush=True)
@@ -33,7 +35,6 @@ if not TOKEN:
     print("❌ ERROR: BOT_TOKEN not found!", flush=True)
     logger.error("BOT_TOKEN environment variable is not set!")
     sys.exit(1)
-
 print(f"✅ Token found: {TOKEN[:10]}...", flush=True)
 
 try:
