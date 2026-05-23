@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import (
-    ApplicationBuilder,
+    Application,
     CommandHandler,
     ContextTypes
 )
@@ -14,6 +14,7 @@ from config import BOT_NAME
 
 import os
 import logging
+import asyncio
 
 # Setup logging
 logging.basicConfig(
@@ -191,7 +192,7 @@ CANDLESTICK:
 """
 
 # AUTO SIGNAL TASK
-async def auto_signal(app):
+async def auto_signal(app: Application):
     
     global CHAT_ID
     
@@ -212,39 +213,60 @@ async def auto_signal(app):
     except Exception as e:
         logger.error(f"❌ Error in auto_signal: {str(e)}")
 
-try:
-    logger.info("🚀 Initializing Telegram bot...")
-    app = ApplicationBuilder().token(TOKEN).build()
-    
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("signal", signal))
-    app.add_handler(CommandHandler("help", help_command))
-    app.add_handler(CommandHandler("status", status))
-    app.add_handler(CommandHandler("history", history))
-    app.add_handler(CommandHandler("stats", stats))
-    
-    logger.info("✅ Command handlers registered")
-    
-    scheduler = AsyncIOScheduler()
-    
-    scheduler.add_job(
-        auto_signal,
-        "interval",
-        minutes=5,
-        args=[app]
-    )
-    
-    scheduler.start()
-    logger.info("✅ APScheduler started (auto-signals every 5 minutes)")
-    
-    logger.info("🔥 MATOM AI TRADER RUNNING... 🔥")
-    logger.info(f"Bot Name: {BOT_NAME}")
-    logger.info("Waiting for commands...")
-    
-    app.run_polling()
-    
-except Exception as e:
-    logger.critical(f"❌ CRITICAL ERROR: {str(e)}")
-    import traceback
-    logger.critical(traceback.format_exc())
-    raise
+async def main():
+    """Start the bot with async polling"""
+    try:
+        logger.info("🚀 Initializing Telegram bot...")
+        app = Application.builder().token(TOKEN).build()
+        
+        # Add handlers
+        app.add_handler(CommandHandler("start", start))
+        app.add_handler(CommandHandler("signal", signal))
+        app.add_handler(CommandHandler("help", help_command))
+        app.add_handler(CommandHandler("status", status))
+        app.add_handler(CommandHandler("history", history))
+        app.add_handler(CommandHandler("stats", stats))
+        
+        logger.info("✅ Command handlers registered")
+        
+        # Setup scheduler for auto signals
+        scheduler = AsyncIOScheduler()
+        scheduler.add_job(
+            auto_signal,
+            "interval",
+            minutes=5,
+            args=[app]
+        )
+        scheduler.start()
+        logger.info("✅ APScheduler started (auto-signals every 5 minutes)")
+        
+        logger.info("🔥 MATOM AI TRADER RUNNING... 🔥")
+        logger.info(f"Bot Name: {BOT_NAME}")
+        logger.info("Waiting for commands...")
+        
+        # Start the bot with async polling
+        async with app:
+            await app.start()
+            await app.updater.start_polling(allowed_updates=Update.ALL_TYPES)
+            logger.info("✅ Bot polling started!")
+            
+            # Keep the bot running
+            try:
+                await asyncio.Event().wait()
+            except KeyboardInterrupt:
+                logger.info("🛑 Bot stopped by user")
+            finally:
+                await app.updater.stop()
+                await app.stop()
+        
+    except Exception as e:
+        logger.critical(f"❌ CRITICAL ERROR: {str(e)}")
+        import traceback
+        logger.critical(traceback.format_exc())
+        raise
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logger.info("Bot shutdown complete")
